@@ -9,11 +9,12 @@ import router from './router';
 
 // redux store 에서 관리될 state 의 초기값
 const initState = {
-  userInfo : null,
-  loginModal : {
-    title : "",
-    show : false
-  }
+  userInfo:null,
+  loginModal:{
+    title:"",
+    show:false
+  },
+  logoutTimer:null
 };
 
 //reducer 함수
@@ -29,7 +30,12 @@ const reducer = (state=initState, action)=>{
       ...state,
       loginModal : action.payload
     }
-  } else{
+  } else if(action.type === "LOGOUT_TIMER"){
+    newState = {
+      ...state,
+      logoutTimer : action.payload
+    }
+  } else {
     newState=state;
   }
   return newState;

@@ -13,7 +13,7 @@ import ConfirmModal from '../components/ConfirmModal';
 import api from '../api';
 const cx=binder.bind(customCss);
 
-function PostDetail(props) {
+function PostDetail() {
     // "/posts/:num" 에서 num 에 해당되는 경로 파라미터 값 읽어오기
     const {num} = useParams()
     //글 하나의 정보를 상태값으로 관리

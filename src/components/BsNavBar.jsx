@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import api from '../api';
 
-function BsNavBar(props) {
+function BsNavBar() {
 
     // store 의 상태값을 바꿀 함수
     const dispatch = useDispatch();
@@ -14,6 +14,8 @@ function BsNavBar(props) {
     const userInfo = useSelector(state=>state.userInfo);
     // route 이동을 하기위한 hook
     const navigate = useNavigate();
+    // 로그아웃 타이머
+    const logoutTimer = useSelector(state=>state.logoutTimer);
 
     return (
         <>
@@ -44,6 +46,9 @@ function BsNavBar(props) {
                                         dispatch({type:"USER_INFO", payload:null});
                                         // 인덱스로 이동
                                         navigate("/");
+                                        // 로그아웃 타이머 초기화
+                                        clearTimeout(logoutTimer);
+                                        dispatch({type:"LOGOUT_TIMER", payload:null});
                                     }}>Logout</Button>
                                 </Nav>
                             </>
