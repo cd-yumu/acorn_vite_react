@@ -75,7 +75,7 @@ function PostDetail() {
          api.post(`/posts/${num}/comments`, formObject)
          .then(res =>{
             console.log(res.data);
-
+            refreshComments() //여기였대요 래히핑이 찾았어...ㅎ...
             // 댓글 입력창 초기화
             e.target.content.value = "";    // textarea 의 value 에 빈 문자열 넣어주기
          })
@@ -92,7 +92,7 @@ function PostDetail() {
     });
 
     // 댓글 정보를 얻어오는 함수
-    const refreshComments = (e)=>{
+    const refreshComments = ()=>{
         api.get(`/posts/${num}/comments?pageNum=1`)
         .then(res=>{
             // 응답되는 댓글 목록을 상태값에 넣어준다.
@@ -233,6 +233,12 @@ function CommemntLi({postNum, comment, onRefresh}){
     // userInfo 는 null 일 가능성을 고려해서 && 를 사용한다. -> null, false, 빈문자열 을 대비한다다
     // userName 에는 userInfo 가 null 이면 null, null 이 아니면 userName 이 대입된다.
 
+    /* 상태값 관리를 통해 댓글의 대댓글 작성 폼 요소의 생성과 비생성을 제어한다 */
+    // 대댓글 form 상태 관리
+    const [insertForm, setInsertForm] = useState(false);
+    // 댓글 수정 form 상태 관리
+    const [updateForm, setUpdateForm] = useState(false);
+
     // 프로필 이미지 처리
     const profileImage = comment.profileImage ? 
         <img className={cx("profile-image")} src={`/upload/${comment.profileImage}`} alt="Profile" />
@@ -242,20 +248,6 @@ function CommemntLi({postNum, comment, onRefresh}){
             <path fillRule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
         </svg>; 
             
-    //수정 삭제 링크 처리 
-    // 로그인된 useName 이 댓글의 작성자와 같을 경우
-    /*
-        link 에 대입되는 값은 
-        False 일 때, false
-        True 일 때, jsx 객체 가 대입된다.
-        즉, false 또는 a 요소 두 개가 들어있는 jsx 객체가 대입된다.
-        이때, react 는 boolean 값을 UI 에 랜더링 하지 않는다.
-     */
-    const link = userName === comment.writer && <>
-        <button className={cx("update-link")}>수정</button>
-        <button className={cx("delete-link")}>삭제</button>
-    </>
-
     // 대댓글 등록 폼 submit 이벤트 처리
     const handleReInsertSubmit = (e)=>{
         e.preventDefault();
@@ -265,8 +257,9 @@ function CommemntLi({postNum, comment, onRefresh}){
         const formObject = Object.fromEntries(formData.entries());
         // 새로운 댓글을 axios 를 이용해서 전송한다.
         api.post(`/posts/${postNum}/comments`,formObject)
-        .then(res=>{
+        .then(()=>{
             onRefresh();
+            setInsertForm(false);
         })
         .catch(err=>console.log(err));
     };
@@ -279,17 +272,59 @@ function CommemntLi({postNum, comment, onRefresh}){
         const formData = new FormData(e.target);
         const formObject = Object.fromEntries(formData.entries());
         // 댓글을 수정하는 요청 보내기
-        api.patch(`/posts/${postNum}/comments`,formObject)
-        .then(res=>{
+        api.patch(`/posts/${postNum}/comments`,formObject)  
+        .then(()=>{
             onRefresh();
+            setUpdateForm(false);
         })
         .catch(err=>console.log(err));
     };
 
+    // 답글 버튼을 눌렀을 때 실행할 함수
+    const handleInsertButton = ()=>{
+        setInsertForm(!insertForm);
+    };
+
+    // 수정 버튼을 눌렀을 때 실행할 함수
+    const handleUpdateButton = ()=>{
+        setUpdateForm(!updateForm);
+    };
+
+    // 삭제 버튼을 눌렀을 때 실행할 함수 
+    const handleDeleteButton = ()=>{
+        const isDelete = confirm("정말정말로 삭제하시겠습니까?");
+        if(isDelete){
+            console.log("comment.num:")
+            console.log(comment.num);
+            // 댓글을 삭제하는 요청 보내기 
+            api.delete(`/posts/${comment.num}/delete-comment`)
+            .then(()=>{
+                onRefresh();
+            })
+            .catch(err=>console.log(err));
+        }
+    };
    
+    //수정 삭제 링크 처리 
+    // 로그인된 useName 이 댓글의 작성자와 같을 경우
+    /*
+        link 에 대입되는 값은 
+        False 일 때, false
+        True 일 때, jsx 객체 가 대입된다.
+        즉, false 또는 a 요소 두 개가 들어있는 jsx 객체가 대입된다.
+        이때, react 는 boolean 값을 UI 에 랜더링 하지 않는다.
+     */
+        const link = userName === comment.writer && 
+            <>
+                <button className={cx("update-link")} onClick={handleUpdateButton}>
+                    {updateForm?"수정취소":"수정"}
+                </button>
+                <button className={cx("delete-link")} onClick={handleDeleteButton}>삭제</button>
+            </>;
+
     return ( 
     <>
-       <li>
+       <li className={cx({"indent":comment.num !== comment.parentNum})}>
             {comment.deleted === "yes" ?
             <>
                 <svg style={{display: comment.num!==comment.parentNum?"inline":"none"}}  
@@ -320,7 +355,9 @@ function CommemntLi({postNum, comment, onRefresh}){
 
                         {/* 답글, 수정, 삭제 버튼 */}
                         <div className={cx("comment-actions")}>
-                            <button className={cx("reply-link")}>답글</button>
+                            <button className={cx("reply-link")} onClick={handleInsertButton}>
+                                {insertForm ? "취소" : "답글" }
+                            </button>
                             {link}
                         </div>
                     </dt>
@@ -329,21 +366,27 @@ function CommemntLi({postNum, comment, onRefresh}){
 					</dd>
 				</dl>
 
-                {/* 댓글의 댓글 작성할 폼 미리 출력하기 */}
-				<form onSubmit={handleReInsertSubmit} className={cx("re-insert-form")}  method="post">
-					<input type="hidden" name="postNum" defaultValue={postNum}/>
-					<input type="hidden" name="targetWriter" defaultValue={comment.writer}/>
-					<input type="hidden" name="parentNum" defaultValue={comment.parentNum}/>
-					<textarea name="content"></textarea>
-					<button type="submit">등록</button>
-				</form>
+                {/* 상태값으로 관리 중인 insertForm 과 updateForm 을 통해 해당 폼 요소를 선택적으로 생성한다. */}
+                {   insertForm &&
+                    // 댓글의 댓글 작성할 폼 
+                    <form onSubmit={handleReInsertSubmit} className={cx("re-insert-form")}  method="post">
+                        <input type="hidden" name="postNum" defaultValue={postNum}/>
+                        <input type="hidden" name="targetWriter" defaultValue={comment.writer}/>
+                        <input type="hidden" name="parentNum" defaultValue={comment.parentNum}/>
+                        <textarea name="content"></textarea>
+                        <button type="submit">등록</button>
+                    </form>
+                }
 
-				{/* 댓글 수정폼 */}
-				<form onSubmit={handleUpdateSubmit} className={cx("update-form")}  method="post">
-					<input type="hidden" name="num" defaultValue={comment.num}/>
-					<textarea name="content" defaultValue={comment.content}></textarea>
-					<button type="submit">수정확인</button>
-				</form>	
+                {   updateForm &&
+                    // 댓글 수정폼 
+                    <form onSubmit={handleUpdateSubmit} className={cx("update-form")}  method="post">
+                        <input type="hidden" name="num" defaultValue={comment.num}/>
+                        <textarea name="content" defaultValue={comment.content}></textarea>
+                        <button type="submit">수정확인</button>
+                    </form>	
+                }
+
             </>
             }
         </li> 
