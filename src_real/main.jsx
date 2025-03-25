@@ -1,26 +1,26 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';  // App.js 를 import 해서 App 이라는 이름으로 사용하기기
-import { Provider } from 'react-redux';
+
+//import reportWebVitals from './reportWebVitals';
 import { legacy_createStore as createStore } from 'redux';
 import { RouterProvider } from 'react-router-dom';
+import { Provider } from 'react-redux';
 import router from './router';
 
 // redux store 에서 관리될 state 의 초기값
 const initState = {
-  userInfo: null,
-  loginModal: {
+  userInfo:null,
+  loginModal:{
     title:"",
     show:false,
-    url:""
+    url:null      // 로그인 후 갈 곳 정보보
   },
-  logoutTimer: null
-}
+  logoutTimer:null
+};
 
+//reducer 함수
 const reducer = (state=initState, action)=>{
   let newState;
-  // 로그인된 사용자 정보 저장 - userName, role
   if(action.type === "USER_INFO"){
     newState = {
       ...state,
@@ -36,13 +36,14 @@ const reducer = (state=initState, action)=>{
       ...state,
       logoutTimer : action.payload
     }
-  } else{
+  } else {
     newState=state;
   }
   return newState;
-}
+};
 
-const store = createStore(reducer)
+// reducer 함수를 전달하면서 store(저장소) 를 만든다.
+const store = createStore(reducer);
 
 // id 가 root 인 div 안을 App.js 에서 리턴해준 component 로 채우기기
 const root = ReactDOM.createRoot(document.getElementById('root'));
@@ -55,4 +56,4 @@ root.render(
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-//reportWebVitals();
+//reportWebVitals(); 이건 사용하지 않음 (React -> Vite)

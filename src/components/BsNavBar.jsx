@@ -1,72 +1,78 @@
-// src/componenets/BsNavBar.jsx
-
 import React from 'react';
 import { Button, Container, Nav, Navbar } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
-import api from '../api';
+import { NavLink, useNavigate } from 'react-router-dom';
 
-function BsNavBar() {
+function BsNavBar(props) {
 
-    // store 의 상태값을 바꿀 함수
-    const dispatch = useDispatch();
-    // redux store 로 부터 상태값 가져오기기
+    // Store Data
     const userInfo = useSelector(state=>state.userInfo);
-    // route 이동을 하기위한 hook
+
+    // Hook
+    const dispatch = useDispatch();
     const navigate = useNavigate();
-    // 로그아웃 타이머
-    const logoutTimer = useSelector(state=>state.logoutTimer);
+
+
+    //Handler
+    const handleLogin = ()=>{
+        console.log("handleLogin 작동");
+        // 로그인 모달창 띄우기
+        const action = {
+            type : "LOGIN_MODAL", 
+            payload : {
+                title:"Login Form.",
+                show:true
+            }
+        };
+        dispatch(action);
+    };
+
+
+    const handleLogout = ()=>{ 
+        const answer = window.confirm("Do you want Logout?")
+        if(answer){
+            alert("Logout Succeed");                         // 1. 알려주기
+            delete localStorage.token;                       // 2. localStorage 에서 토큰 삭제하기
+            dispatch({type:"USER_INFO", payload:null});      // 3. Redux Store 에 저장된 유저 정보 삭제하기
+            navigate("/");                                   // 4. Index Page 로 이동하기기    
+        }
+    };
+
+
+    const handleSignup = ()=>{};
 
     return (
         <>
-            <Navbar fixed="top" expand="md" className="bg-warning mb-2">
-                <Container>
-                    <Navbar.Brand as={NavLink} to="/">Acorn</Navbar.Brand>
+            <Navbar fixed='top' expand='md' className='bg-success mb-2'>
+                <Container >
+                    <Navbar.Brand as={NavLink} className='text-white'>MyPage</Navbar.Brand>
                     <Navbar.Toggle aria-controls="one"/>
                     <Navbar.Collapse id="one">
+                        {/* 네비바 링크 목록 */}
                         <Nav className='me-auto'>
-                            <Nav.Link as={NavLink} to="/">Home</Nav.Link>
-                            <Nav.Link as={NavLink} to="/posts">Post</Nav.Link>
-                            <Nav.Link as={NavLink} to="/quiz">Quiz</Nav.Link>
+                            <Nav.Link as={NavLink} to="/" className='text-white'>Home</Nav.Link>
+                            <Nav.Link as={NavLink} to="/posts" className='text-white'>Post</Nav.Link>
                         </Nav>
+
+                        {/* 로그인 관련 */}
                         {
-                            userInfo ? 
-                            <>
+                            userInfo ?
+                                // 사용자 정보가 있으면 - 정보보기, 로그아웃 제공 
                                 <Nav>
-                                    <Nav.Link as={Link} to="/user/detail">{userInfo.userName}</Nav.Link>
-                                    <span className='navbar-text'>Signed in</span>
-                                    {/* <span className='navbar-text'>Signed in</span> */}
-                                    <Button className='ms-2' size='sm' variant='outline-primary' onClick={()=>{
-                                        const isLogin = window.confirm("확인을 누르면 로그아웃 합니다");
-                                        if(!isLogin) return;
-                                        // 토큰 삭제
-                                        delete localStorage.token;
-                                        // store 에 userInfo 를 초기화
-                                        dispatch({type:"USER_INFO", payload:null});
-                                        // 인덱스로 이동
-                                        navigate("/");
-                                        // 로그아웃 타이머 초기화
-                                        clearTimeout(logoutTimer);
-                                        dispatch({type:"LOGOUT_TIMER", payload:null});
-                                    }}>Logout</Button>
+
+                                    <Button onClick={handleLogout}>Logout</Button>
                                 </Nav>
-                            </>
                             :
-                            <>
-                                <Button size='sm' className='sm' variant='success' onClick={()=>{
-                                        const action = {type : "LOGIN_MODAL", payload : {
-                                            title : "Login Form.",
-                                            show : "true"
-                                        }};
-                                        dispatch(action);
-                                    }}>Login
-                                </Button>
-                                <Button size='sm' className='ms-2' variant='primary'>Signup</Button>
-                            </>
+                                // 사용자 정보가 없으면 - 로그인, 회원가입 제공
+                                <Nav>
+                                    <Button onClick={handleLogin} className='me-2'>Login</Button>
+                                    <Button onClick={handleSignup}>Sign-up</Button>
+                                </Nav>
                         }
+
                     </Navbar.Collapse>
                 </Container>
-            </Navbar> 
+            </Navbar>
         </>
     );
 }

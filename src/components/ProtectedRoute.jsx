@@ -1,38 +1,31 @@
-// src/components/ProtectedRoute.jsx
-
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Navigate, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
-// props 에서 children 을 얻어내 리턴하는 함수
+// Protected Router 용으로 사용하기 위해서는 children 을 전달 받고 리턴해준다.
 function ProtectedRoute({children}) {
-    // 로그인 여부를 알기 위해 userInfo 를 얻어낸다.
-    const userInfo = useSelector(state=>state.userInfo);
-    // 현재 경로를 알아내기 위해
+    // 현재 로그인 상태를 확인하여 허가 여부를 결정한다.
+    
+
+    // Redux Store
+    const isLogin = useSelector(item => item.userInfo);
+
+    // Hook
     const location = useLocation();
-    // action 을 발행하기 위해
     const dispatch = useDispatch();
 
-    // 만약 로그인 상태가 아니라면
-    if(!userInfo){
-        // 원래 가려던 목적지 정보와 query 파라미터 정보를 읽어내서
-        const url = location.pathname + location.search;
-        // 테스트로 출력해보기
-        console.log(url)
-        
-        const payload = {
-            show: true,
-            title:"해당 페이지는 로그인이 필요합니다.",
-            url: url
-        }
-        // 로그인 창을 띄우는 action 을 발생하면서 payload 를 전달한다.
-        dispatch({type:"LOGIN_MODAL", payload });
+    // 로그인 하지 않은 상태라면
+    if(!isLogin){
+        // 로그인 모달창 띄우기
+        dispatch({type:"LOGIN_MODAL", payload:{
+            title:"You need to Login",
+            show: true, 
+            url: location.pathname + location.search    // 원래 가려던 목적지도 전달
+        }});
 
-        // return null 하면 currentRoute 에 빈 페이지를를 출력한다.
-        return null;
-        // 인덱스 페이지로 감
-        //return <Navigate to="/"/>
-    }
+        return null;    // 아무것도 출력 안 함
+    } 
+
     return children;
 }
 
