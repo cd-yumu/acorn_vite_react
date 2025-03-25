@@ -10,17 +10,50 @@ import api from '../api';
 function PostForm(props) {
 
     // SmartEditor에 작성한 내용을 textarea 의 value 로 넣어줄 때 필요한 함수가 editorTool 이다.
-    const [editorTool, setEditorTool] = useState();
+    const [editorTool, setEditorTool] = useState([]);
+
+    // 현재까지 입력한 내용을 상태값으로 관리
+    const [currentContent, setCurrentContent] = useState("");
+
+    // 입력한 내용을 얻어오기 위한 useRef()
+    const inputTitle = useRef();
+    const inputContent = useRef();
 
     useEffect(()=>{
         // initEditor 함수가 호출하면서 SmartEditor 로 변환할 textarea 의 id 를 전달하면
         // textarea 가 SmartEditor 로 변경되면서 에디터 tool 객체가 리턴된다.
         setEditorTool(initEditor("content"));   // initEditor() 함수를 호출해야 SmartEditor 가 초기화 된다.
+
+        // resize 이벤트가 발생할 때마다 호출될 함수
+        const handleResize = () =>{
+
+            // if(inputContent.current){
+            //     const a = editorTool.getContent();
+            //     console.log(a);
+            //     console.log("여기기");
+            //     setEditorTool(initEditor("content"));
+            //     editorTool.exec();
+            //     console.log(inputContent.current);
+            // }
+            
+            // console.log(inputContent.current.value);
+            // console.log(document.querySelector("#content").value);
+            // setEditorTool(initEditor("content"));
+            // editorTool.exec();
+            //setCurrentContent(inputContent.current.value);
+            
+        }
+        // resize 이벤트가 발생할 때 실행할 함수 등록록
+        window.addEventListener("resize", handleResize);
+
+        return ()=>{
+            // 쓸데없이 계속 리스닝 하지 않도록 제거할 필요가 있다.
+            // 이벤트 리스너 제거하기
+            window.removeEventListener("resize", handleResize);
+        }
     },[]);
 
-    // 입력한 내용을 얻어오기 위한 useRef()
-    const inputTitle = useRef();
-    const inputContent = useRef();
+    
     
     // 경로 이동을 할 함수
     const navigate = useNavigate();
@@ -45,6 +78,7 @@ function PostForm(props) {
                     {/* 아래 코드는 <textarea> 요소로 변화되고 id="content 가 된다." */}
                     <Form.Control ref={inputContent} as="textarea" rows="10"/>
                 </Form.Group> 
+
                 <Button type="submit" onClick={(e)=>{
                     // 기본 폼 제출 막기
                     e.preventDefault();

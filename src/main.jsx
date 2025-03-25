@@ -12,7 +12,8 @@ const initState = {
   userInfo:null,
   loginModal:{
     title:"",
-    show:false
+    show:false,
+    url:null      // 로그인 후 갈 곳 정보보
   },
   logoutTimer:null
 };
@@ -47,11 +48,9 @@ const store = createStore(reducer);
 // id 가 root 인 div 안을 App.js 에서 리턴해준 component 로 채우기기
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <React.StrictMode>
     <Provider store={store}>
       <RouterProvider router={router}/>
     </Provider>
-  </React.StrictMode>
 );
 
 // If you want to start measuring performance in your app, pass a function

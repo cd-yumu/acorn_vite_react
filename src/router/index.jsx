@@ -14,8 +14,8 @@ import PostUpdateForm from "../pages/PostUpdateForm";
 import Quiz from "../pages/Quiz";
 
 const routes = [
-    {path: "/index.html", element:<Home/>},
-    {path: "/", element:<Home/>},
+    {path: "/index.html", element: <Home/>},
+    {path: "/", element: <Home/>},
     {path: "/posts", element: <Post/>},
     {path: "/user/detail", element: <ProtectedRoute><UserDetail/></ProtectedRoute>},
     {path: "/user/edit", element: <ProtectedRoute><UserUpdateForm/></ProtectedRoute>},

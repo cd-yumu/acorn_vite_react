@@ -34,14 +34,13 @@ function BsNavBar() {
                             <>
                                 <Nav>
                                     <Nav.Link as={Link} to="/user/detail">{userInfo.userName}</Nav.Link>
+                                    <span className='navbar-text'>Signed in</span>
                                     {/* <span className='navbar-text'>Signed in</span> */}
                                     <Button className='ms-2' size='sm' variant='outline-primary' onClick={()=>{
                                         const isLogin = window.confirm("확인을 누르면 로그아웃 합니다");
                                         if(!isLogin) return;
                                         // 토큰 삭제
                                         delete localStorage.token;
-                                        // 요청 헤더에 token 포함되도록 설정한것 삭제하기
-                                        delete api.defaults.headers.common["Authorization"];
                                         // store 에 userInfo 를 초기화
                                         dispatch({type:"USER_INFO", payload:null});
                                         // 인덱스로 이동
