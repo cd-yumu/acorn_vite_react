@@ -43,6 +43,7 @@ function BsNavBar(props) {
 
     return (
         <>
+            
             <Navbar fixed='top' expand='md' className='bg-success mb-2'>
                 <Container >
                     <Navbar.Brand as={NavLink} className='text-white'>MyPage</Navbar.Brand>

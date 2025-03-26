@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, FloatingLabel, Form, Modal } from 'react-bootstrap';
+import { Alert, Button, FloatingLabel, Form, Modal } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import api from '../api';
 import { jwtDecode } from 'jwt-decode';
@@ -17,7 +17,7 @@ function LoginModal(props) {
 
     // State
     const [inputInfo, setInputInfo] = useState({});
-    const [show, setShow] = useState(props.show);
+    const [msg, setMsg] = useState("");
 
 
 
@@ -41,10 +41,12 @@ function LoginModal(props) {
     };
 
     const handleLogin = ()=>{   // 로그인 요청
+        console.log(inputInfo);
         // /auth: 전달된 정보를 확인 후 토큰을 리턴함
-        api.post("/auth", inputInfo)    
-        // 로그인 성공 시
+        api.post("/auth", inputInfo)
         .then( res=>{
+            // 로그인 성공
+
             // 로그인 모달창 닫기
             handleClose();
 
@@ -85,7 +87,11 @@ function LoginModal(props) {
             // 원래 가려던 경로가 있는지 확인
             if(loginModal.url) navigate(loginModal.url);
         })
-        .catch(err=>console.log(err));
+        .catch(err=>{
+            // 로그인 실패
+            console.log(err)
+            setMsg("아이디 혹은 비밀번호를 확인하세요.");
+        });
     };  // handleLogin
 
     
@@ -107,7 +113,7 @@ function LoginModal(props) {
                         <Form.Control onChange={handleChange} name="password" type="password" />
                     </FloatingLabel>
                     {/* 로그인 정보 오류 시 발생 메시지 */}
-                    {/* {errorMsg && <Alert variant='danger'>{errorMsg}</Alert>} */}
+                    {msg && <Alert variant='danger'>{msg}</Alert>}
                 </Modal.Body>
 
                 <Modal.Footer>
